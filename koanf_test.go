@@ -542,7 +542,7 @@ func TestFlags(t *testing.T) {
 
 	// Initialize the provider with the Koanf instance passed where default values
 	// will merge if the keys are not present in the conf map.
-	assert.Nil(k.Load(posflag.Provider(f, ".", posflag.WithKoanf(k)), nil), "error loading posflag")
+	assert.Nil(k.Load(posflag.Provider(f, ".", k), nil), "error loading posflag")
 	assert.Equal("flag", k.String("parent1.child1.type"), "types don't match")
 	assert.Equal("flag", k.String("flagkey"), "value doesn't match")
 	assert.NotEqual("flag", k.String("parent1.name"), "value doesn't match")
@@ -558,16 +558,20 @@ func TestFlags(t *testing.T) {
 	// Test the provider can remap flag to keys with different names
 	pf := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	pf.String("type", "flag", "")
-	pf.Set("type", "basicflag")
+	pf.Set("type", "posflag")
 	pf.String("out", "defout", "")
-	remap := map[string]*pflag.Flag{
-		"parent7.type": pf.Lookup("type"),
+	remap := func(flag *pflag.Flag) string {
+		if flag.Name == "type" {
+			return "parent7.type"
+		}
+		return flag.Name
 	}
-	assert.Nil(k.Load(posflag.Provider(pf, ".", posflag.WithKoanf(k), posflag.WithRenameKeys(remap)), nil), "error loading basicflag")
-	assert.Equal("basicflag", k.String("parent1.child1.type"), "types don't match")
+
+	assert.Nil(k.Load(posflag.ProviderWithOptions(pf, ".", posflag.ParentKoanf(k), posflag.RenameCallback(remap)), nil), "error loading posflag")
+	assert.Equal("posflag", k.String("parent7.type"), "types don't match")
 
 	// Test without passing the Koanf instance where default values will not merge.
-	assert.Nil(k2.Load(posflag.Provider(f, "."), nil), "error loading posflag")
+	assert.Nil(k2.Load(posflag.Provider(f, ".", nil), nil), "error loading posflag")
 	assert.Equal("flag", k2.String("parent1.child1.type"), "types don't match")
 	assert.Equal("", k2.String("flagkey"), "value doesn't match")
 	assert.NotEqual("", k2.String("parent1.name"), "value doesn't match")
