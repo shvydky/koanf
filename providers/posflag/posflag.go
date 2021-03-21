@@ -40,7 +40,6 @@ func Provider(f *pflag.FlagSet, delim string, ko *koanf.Koanf) *Posflag {
 // takes a (key, value) with the variable name and value and allows you
 // to modify both. This is useful for cases where you may want to return
 // other types like a string slice instead of just a string.
-// Deprecated: this function is deprecated, use WithValue option to achieve the same result
 func ProviderWithValue(f *pflag.FlagSet, delim string, ko *koanf.Koanf, cb func(key string, value string) (string, interface{})) *Posflag {
 	return &Posflag{
 		flagset:       f,

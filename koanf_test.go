@@ -559,7 +559,7 @@ func TestFlags(t *testing.T) {
 	pf := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	pf.String("type", "flag", "")
 	pf.Set("type", "posflag")
-	pf.String("out", "defout", "")
+	pf.String("out", "default", "")
 	remap := func(flag *pflag.Flag) string {
 		if flag.Name == "type" {
 			return "parent7.type"
